@@ -1,5 +1,9 @@
 package sensitive
 
+import (
+	"fmt"
+)
+
 // Trie 短语组成的Trie树.
 type Trie struct {
 	Root *Node
@@ -232,6 +236,58 @@ func (tree *Trie) FindAll(text string) []string {
 	}
 
 	return nil
+}
+
+/*
+Hide 词语暂时隐藏
+
+format "<<||#|%d|-|=>"
+*/
+func (tree *Trie) Hide(text string) (string, map[string]string) {
+	var (
+		parent      = tree.Root
+		current     *Node
+		left        = 0
+		found       bool
+		runes       = []rune(text)
+		length      = len(runes)
+		resultRunes = make([]rune, 0, length)
+		matches     = make(map[string]string)
+		index       = 0
+	)
+
+	for position := 0; position < length; position++ {
+		current, found = parent.Children[runes[position]]
+
+		if !found || (!current.IsPathEnd() && position == length-1) {
+			resultRunes = append(resultRunes, runes[left])
+			parent = tree.Root
+			position = left
+			left++
+			continue
+		}
+
+		// 命中最长的敏感词
+		if current.IsPathEnd() {
+			// 替换掉敏感词为我们的编号
+			strIndex := fmt.Sprintf("<<||#|%d|-|=>>", index)
+			resultRunes = append(resultRunes, []rune(strIndex)...)
+			// 保存命中的敏感词
+			matches[strIndex] = string(runes[left : position+1])
+			//log.Println(string(runes[left : position+1]))
+			index++
+
+			// 继续查找
+			left = position + 1
+			parent = tree.Root
+		} else {
+			parent = current
+		}
+
+	}
+
+	resultRunes = append(resultRunes, runes[left:]...)
+	return string(resultRunes), matches
 }
 
 // NewNode 新建子节点
