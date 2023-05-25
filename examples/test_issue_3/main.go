@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/importcjj/sensitive"
+	"github.com/dan-and-dna/sensitive"
 )
 
 func keywordFilterSearch(content string) (bool, string) {
