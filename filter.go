@@ -111,3 +111,8 @@ func (filter *Filter) Validate(text string) (bool, string) {
 func (filter *Filter) RemoveNoise(text string) string {
 	return filter.noise.ReplaceAllString(text, "")
 }
+
+// AddPlaceholder 添加占位符
+func (filter *Filter) AddPlaceholder(text string) (string, map[string]string) {
+	return filter.trie.AddPlaceholder(text)
+}

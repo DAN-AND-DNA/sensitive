@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/importcjj/sensitive"
+	"github.com/dan-and-dna/sensitive"
 )
 
 func main() {
@@ -57,4 +57,12 @@ func main() {
 	fmt.Println("有一个啊", filter.Filter("有一个啊"))
 	fmt.Println("有一个", filter.Filter("有一个"))
 	fmt.Println("有一", filter.Filter("有一"))
+
+	// 占位符
+	filter.AddWord("毛泽东", "习近平")
+	left, badWords := filter.AddPlaceholder("我们都喜欢毛泽东和习近平")
+	fmt.Println(left)
+	for key, badWord := range badWords {
+		fmt.Println(key, badWord)
+	}
 }
