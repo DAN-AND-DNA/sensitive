@@ -1,6 +1,8 @@
 package sensitive
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Trie 短语组成的Trie树.
 type Trie struct {
@@ -283,6 +285,118 @@ func (tree *Trie) AddPlaceholder(text string) (string, map[string]string) {
 
 	resultRunes = append(resultRunes, runes[left:]...)
 	return string(resultRunes), matches
+}
+
+type Pos struct {
+	Start int
+	End   int
+}
+
+/*
+AddPlaceholderLongest 添加占位符（搜索最长的）
+
+沿着路径找下去，如果找不到就left前进1，找到了left前进到找打的位置
+*/
+func (tree *Trie) AddPlaceholderLongest(text string) (string, []string) {
+	var (
+		parent  = tree.Root
+		current *Node
+		runes   = []rune(text)
+		length  = len(runes)
+		left    = 0
+		found   bool
+
+		positions []Pos
+		matches   []string
+	)
+
+	// 同路径本次命中的敏感词
+	hitBadWord := ""
+	// 同路径上最长的敏感词
+	longestBadWord := ""
+	// 下次开始搜索位置
+	nextSearchPos := 0
+	for position := 0; position < length; position++ {
+		current, found = parent.Children[runes[position]]
+
+		// 本路径搜索结束
+		if !found {
+			// 本路径命中的最长敏感词
+			if len(longestBadWord) > 0 {
+				positions = append(positions, Pos{
+					Start: left,
+					End:   nextSearchPos,
+				})
+
+				// 下次搜索的位置直接跳过该敏感词
+				position = nextSearchPos
+				left = nextSearchPos
+			}
+
+			// 重新初始化
+			parent = tree.Root
+			position = left
+			left++
+
+			longestBadWord = ""
+			hitBadWord = ""
+			continue
+		}
+
+		// 是词库里的某个词
+		if current.IsPathEnd() && left <= position {
+			hitBadWord = string(runes[left : position+1])
+
+			// 记录该敏感词的位置
+			nextSearchPos = position
+
+			// 比较长度，得到最长敏感词
+			if len(longestBadWord) < len(hitBadWord) {
+				longestBadWord = hitBadWord
+			}
+
+			// 直接到最后都是该敏感词
+			if nextSearchPos == length-1 {
+				positions = append(positions, Pos{
+					Start: left,
+					End:   nextSearchPos,
+				})
+				//left = nextSearchPos
+				break
+			}
+		}
+
+		// 如果直到最后都搜不到词库里的词，继续从句子的下个字开始搜索
+		if position == length-1 {
+			parent = tree.Root
+			position = left
+			left++
+			continue
+		}
+
+		// 继续在该路径搜索
+		parent = current
+	}
+
+	start := 0
+	end := 0
+	index := 0
+	var ret []rune
+
+	// 替换敏感词为占位符
+	for _, pos := range positions {
+		// 收集全部敏感词
+		matches = append(matches, string(runes[pos.Start:pos.End+1]))
+		end = pos.Start
+		ret = append(ret, runes[start:end]...)
+		strIndex := fmt.Sprintf("{{%d}}", index)
+		ret = append(ret, []rune(strIndex)...)
+		index++
+		start = pos.End + 1
+	}
+	ret = append(ret, runes[start:]...)
+
+	return string(ret), matches
 }
 
 // NewNode 新建子节点
