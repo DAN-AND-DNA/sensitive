@@ -1,9 +1,5 @@
 package sensitive
 
-import (
-	"fmt"
-)
-
 // Trie 短语组成的Trie树.
 type Trie struct {
 	Root *Node
@@ -268,7 +264,8 @@ func (tree *Trie) AddPlaceholder(text string) (string, map[string]string) {
 		// 命中最长的敏感词
 		if current.IsPathEnd() {
 			// 替换掉敏感词为我们的编号
-			strIndex := fmt.Sprintf("{{%d}}", index)
+			//strIndex := fmt.Sprintf("{{%d}}", index)
+			strIndex := "{{#}}"
 			resultRunes = append(resultRunes, []rune(strIndex)...)
 			// 保存命中的敏感词
 			matches[strIndex] = string(runes[left : position+1])
@@ -389,7 +386,8 @@ func (tree *Trie) AddPlaceholderLongest(text string) (string, []string) {
 		matches = append(matches, string(runes[pos.Start:pos.End+1]))
 		end = pos.Start
 		ret = append(ret, runes[start:end]...)
-		strIndex := fmt.Sprintf("{{%d}}", index)
+		strIndex := "{{#}}"
+		//strIndex := fmt.Sprintf("{{%d}}", index)
 		ret = append(ret, []rune(strIndex)...)
 		index++
 		start = pos.End + 1

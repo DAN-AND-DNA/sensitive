@@ -116,3 +116,8 @@ func (filter *Filter) RemoveNoise(text string) string {
 func (filter *Filter) AddPlaceholder(text string) (string, map[string]string) {
 	return filter.trie.AddPlaceholder(text)
 }
+
+// AddPlaceholderLongest 添加占位符
+func (filter *Filter) AddPlaceholderLongest(text string) (string, []string) {
+	return filter.trie.AddPlaceholderLongest(text)
+}
